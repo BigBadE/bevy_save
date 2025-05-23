@@ -1,8 +1,4 @@
-use std::{
-    any::TypeId,
-    marker::PhantomData,
-};
-
+use std::{any::TypeId, marker::PhantomData};
 use bevy::{
     ecs::{
         entity::{
@@ -22,7 +18,6 @@ use bevy::{
     reflect::TypeRegistry,
     scene::SceneSpawnError,
 };
-
 use crate::{
     error::Error,
     prelude::*,
@@ -223,6 +218,16 @@ impl<F: QueryFilter> SnapshotApplier<'_, F> {
                         }
                     })?;
 
+                if type_id == TypeId::of::<Children>() {
+                    continue
+                }
+                if type_id == TypeId::of::<ChildOf>() {
+                    let component = component.reflect_ref().as_tuple_struct().expect("Test").field(0).unwrap();
+                    let child: &Entity = component.try_downcast_ref::<Entity>().expect("Expected ChildOf");
+                    self.world.entity_mut(entity).insert(ChildOf(*entity_map
+                        .get(child).expect("Expected child of have a parent!")));
+                    continue
+                }
                 if let Some(map_entities) = registration.data::<ReflectMapEntities>() {
                     SceneEntityMapper::world_scope(entity_map, self.world, |_, mapper| {
                         map_entities.map_entities(component.as_partial_reflect_mut(), mapper);

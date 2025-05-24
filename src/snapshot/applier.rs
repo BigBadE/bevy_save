@@ -222,8 +222,8 @@ impl<F: QueryFilter> SnapshotApplier<'_, F> {
                     continue
                 }
                 if type_id == TypeId::of::<ChildOf>() {
-                    let component = component.reflect_ref().as_tuple_struct().expect("Test").field(0).unwrap();
-                    let child: &Entity = component.try_downcast_ref::<Entity>().expect("Expected ChildOf");
+                    let component = component.reflect_ref().as_tuple_struct().expect("Expected entity field").field(0).unwrap();
+                    let child: &Entity = component.try_downcast_ref::<Entity>().expect("Expected entity");
                     self.world.entity_mut(entity).insert(ChildOf(*entity_map
                         .get(child).expect("Expected child of have a parent!")));
                     continue
